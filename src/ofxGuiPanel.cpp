@@ -19,342 +19,525 @@
  *
  */
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 #include "ofxGuiPanel.h"
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 ofxGuiPanel::ofxGuiPanel()
 {
 	mParamType = kofxGui_Object_Panel;
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
+ofxGuiPanel::~ofxGuiPanel() {
 
-void ofxGuiPanel::init(int id, string name, int x, int y, int border, int spacing)
-{
-	int	textHeight	= (name == "") ? 2 * border :  2 * border +mGlobals->mHeadFontHeight;
-
-	mParamId		= id;
-	mParamName		= name;
-
-	mObjX			= x; 
-	mObjY			= y;
-
-	mBorder			= border;
-	mSpacing		= spacing;
+	// this is done below
+	//delete enableDisableButton;
+	//delete minMaxButton;
 	
-	adjustToNewContent(roundInt(mGlobals->mHeadFont.stringWidth(name)), textHeight);
+	childObjects.clear(); // erase all objects and call all of their destructors
+	
+	cout <<"PANEL DESTRUCTOR CALLED!!"<<endl;
+
+	ofRemoveListener(enableDisableButton->genericOfxGuiEvent, this,  &ofxGuiPanel::buttonEvent);
+	ofRemoveListener(minMaxButton->genericOfxGuiEvent, this,  &ofxGuiPanel::buttonEvent);
+	
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-bool ofxGuiPanel::update(int parameterId, int task, void* data, int length)
+void ofxGuiPanel::init(string _name, int _x, int _y, int _border, int _spacing)
 {
-	bool			handled	= false;
-	ofxGuiObject*	tmpObj	= NULL;
+	int	textHeight	= (_name == "") ? 2 * _border :  2 * _border +mGlobals->mHeadFontHeight;
+
+	canDisable = false;
 	
-	for(int i = 0; i < mObjects.size(); i++)
-	{
-		tmpObj	= (ofxGuiObject*)mObjects.at(i);
-		handled	= tmpObj->update(parameterId, task, data, length);
+	mParamName	= _name;
+
+	x	= _x; 
+	y	= _y;
+
+	mBorder		= _border;
+	mSpacing	= _spacing;
+	
+	windowButtonWidth	=	OFXGUI_BUTTON_WIDTH;
+	windowButtonHeight	=	OFXGUI_BUTTON_HEIGHT;
+	
+	isMinimized		= false;
+	
+	isDragMoveable		= true;
+	
+
+	// draw the min max/ active inactive buttons
+	enableDisableButton = new ofxGuiButton();
+	enableDisableButton->init("", 0, 0, windowButtonWidth, windowButtonHeight, kofxGui_Button_On, kofxGui_Button_Switch, "");
+	enableDisableButton->renderType = kofxGui_Button_Render_X;
+	enableDisableButton->parentObject = this;
+	enableDisableButton->canDisable = false;
+//	enableDisableButton->addKeyMap((int)'m', &ofxGuiPanel::toggleMaxMin);
+	childObjects.push_back(enableDisableButton);
+	
+	
+	minMaxButton = new ofxGuiButton();
+	minMaxButton->init("", windowButtonWidth, 0, windowButtonWidth, windowButtonHeight, kofxGui_Button_Off, kofxGui_Button_Switch, "");
+	minMaxButton->renderType = kofxGui_Button_Render_PlusMinus;
+	minMaxButton->parentObject = this;
+	minMaxButton->canDisable = false;
+	//enableDisableButton->addKeyMap((int)'e', &ofxGuiPanel::toggleEnable);
+	childObjects.push_back(minMaxButton);
+	
+	adjustToNewContent(windowButtonWidth*2, windowButtonHeight ); // make room for both buttons
+	adjustToNewContent(roundInt(mGlobals->mHeadFont.stringWidth(_name)), textHeight); // make room for title
+
+	ofAddListener(enableDisableButton->ofxGuiButtonEvent, this, &ofxGuiPanel::buttonEvent); // add local listener for enable
+	ofAddListener(minMaxButton->ofxGuiButtonEvent, this, &ofxGuiPanel::buttonEvent);		 // add local listener for min/max
+
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::buttonEvent(const void * sender, int & i)
+{
+	
+	cout << "XXXXXXXXXXXXXXXXXXXXXXX GOT MOUSE BUTTON EVENT "<< endl;;
+	
+	if(sender == minMaxButton) {
+		ofxGuiButton* b = (ofxGuiButton*) sender;
+		if(b->mValue == 0) maximize(); else minimize();
 		
-		if(handled)
-			break;
+	} else if (sender == enableDisableButton) {
+		ofxGuiButton* b = (ofxGuiButton*) sender;
+		if(b->mValue == 0) disable(); else enable();
+	} else {
+		ofLog(OF_LOG_ERROR, "unknown button on the panel ...");
 	}
 	
-	return handled;
+	
 }
 
-//	----------------------------------------------------------------------------------------------------
 
+//--------------------------------------------------------------
 void ofxGuiPanel::draw()
 {
 	glPushMatrix();
 		
-		glTranslatef(mObjX, mObjY, 0.0f);
+		glTranslatef(x, y, 0.0f);
 
+	
 		ofFill();
 		
 		//	background
-		glColor4f(mGlobals->mCoverColor.r, mGlobals->mCoverColor.g, mGlobals->mCoverColor.b, mGlobals->mCoverColor.a);
-		ofRect(0.0f, 0.0f, mObjWidth, mObjHeight);
+		if(mouseOver) {
+			glColor4f(0,0,1, mGlobals->mCoverColor.a);
+		} else {
+			glColor4f(mGlobals->mCoverColor.r, mGlobals->mCoverColor.g, mGlobals->mCoverColor.b, mGlobals->mCoverColor.a);
+		}
 	
+		if(isMinimized) {
+			ofRect(0.0f, 0.0f, width, windowButtonHeight + 1);
+		} else {
+			ofRect(0.0f, 0.0f, width, height);
+		}
 		ofNoFill();
 		
-		if(mParamName != "")
-			drawHeadString(mBorder, mBorder, mParamName, false);
-
+		if(mParamName != "") {
+			if(isMinimized) {
+				drawParamString(windowButtonWidth*2+4, 0, mParamName, false);	
+			} else {
+				drawHeadString(mBorder, mBorder + windowButtonHeight, mParamName, false);
+			}
+		}
+		
 		if(mBorder > 0)
 		{
 			//	border
 			glColor4f(mGlobals->mBorderColor.r, mGlobals->mBorderColor.g, mGlobals->mBorderColor.b, mGlobals->mBorderColor.a);
-			ofRect(0.0f, 0.0f, mObjWidth, mObjHeight);
+		
+			if(isMinimized) {
+				ofRect(0.0f, 0.0f, width, windowButtonHeight );
+			} else {
+				ofRect(0.0f, 0.0f, width, height);
+			}
 		}
 	
-		ofxGuiObject* tmpObj;
-	
-		for(int i = 0; i < mObjects.size(); i++)
-		{
-			tmpObj = (ofxGuiObject*)mObjects.at(i);
-			tmpObj->draw();
+		if(isEnabled && !isMinimized) {
+			ofxGuiObject* tmpObj;
+			for(int i = 0; i < childObjects.size(); i++)
+			{
+				tmpObj = (ofxGuiObject*)childObjects.at(i);
+				tmpObj->draw();
+			}
+		} else {
+			minMaxButton->draw();
+			enableDisableButton->draw();
 		}
+	
+	
+		if(mouseDown) {
+			
+			glColor4f(1,0,0,1); // red
+
+			
+			//	border
+			if(isDragging) {
+				glColor4f(1,1,0,1); // yellow
+			}
+						
+			if(isDropSenderReady) {
+				glColor4f(0,1,1,1); // fugly
+			}
+			
+			
+				
+			if(isMinimized) {
+				ofRect(-2.0f, -2.0f, minimizedRect.width+4, minimizedRect.height+4 );
+			} else {
+				ofRect(-2.0f, -2.0f, width+4, height+4);
+			}
+			
+		}
+	
+		
+		if(isDragging) {
+			glColor4f(0,1,.5,1); // green
+			ofRect(-6.0f, -6.0f, width+12, height+12);
+		}
+
+	
+	
+	if(isDropReceiverReady) {
+		glColor4f(0,.5,.5,1); // green
+		ofRect(-10.0f, -10.0f, width+20, height+20);
+
+	}
+	
+	
 	
 	glPopMatrix();
 }
+//--------------------------------------------------------------
+void ofxGuiPanel::exit() {
+	cout << "exiting ... " << endl;
+}
 
-//	----------------------------------------------------------------------------------------------------
-
-bool ofxGuiPanel::mouseDragged(int x, int y, int button)
+//--------------------------------------------------------------
+void ofxGuiPanel::onRollOver(int x, int y)
 {
-	bool handled = false;
+//	cout << "Panel " << mParamName << " roll on! " << x << "/" << y << endl;
+}
+//--------------------------------------------------------------
+void ofxGuiPanel::onRollOut()
+{
+//	cout << "Panel " << mParamName << " roll out! " << endl;
+
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onMouseMove(int x, int y)
+{	
+	//cout << "Panel " << mParamName << " mouse move on! " << x << "/" << y << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onDragOver(int _x, int _y, int button)
+{
+//	cout << "Panel " << mParamName << " drag over! " << x << "/" << y << "/" << button << endl;
 	
-	if(mMouseIsDown)
-	{		
-		ofxPoint2f inside = mouseToLocal(x, y);
-		
-		ofxGuiObject* tmpObj;
-		
-		for(int i = 0; i < mObjects.size(); i++)
-		{
-			tmpObj	= (ofxGuiObject*)mObjects.at(i);
-			handled	= tmpObj->mouseDragged(inside.x, inside.y, button);
-			
-			if(handled)
-				break;
-		}
+	
+	//x = _x;
+	//y = _y;
+}
+
+
+void ofxGuiPanel::onDragging(int _x, int _y, int button)
+{
+//	cout << "Panel " << mParamName << " IS DRAGGING! " << x << "/" << y << "/" << button << endl;
+}
+
+void ofxGuiPanel::onObjectDragStart(int x, int y, int button)
+{
+//	cout << "OBJECT DRAGSTART Panel " << mParamName << " ! " << x << "/" << y << "/" << button << endl;
+}
+
+void ofxGuiPanel::onObjectDragging(int x, int y, int button)
+{
+//	cout << "OBJECT DRAGGING Panel " << mParamName << " ! " << x << "/" << y << "/" << button << endl;
+}
+
+
+
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onDragOutside(int x, int y, int button)
+{
+//	cout << "Panel " << mParamName << " drag outside! " << x << "/" << y << "/" << button << endl;
+}
+
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onObjectDropReceived(int x, int y, int button, ofxGuiObject* sentObject)
+{
+//	cout << "Panel " << mParamName << " OBJECT DROP RECEIVED: " << sentObject->mParamName << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onObjectDropSent(int x, int y, int button, ofxGuiObject* receiverObject)
+{
+//	cout << "Panel " << mParamName << " OBJECT DROP SENT TO: " << receiverObject->mParamName << endl;
+}
+
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onPress(int x, int y, int button)
+{
+//	cout << "Panel " << mParamName << " press! " << x << "/" << y << "/" << button << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onPressOutside(int x, int y, int button)
+{
+//	cout << "Panel " << mParamName << " press outside! " << x << "/" << y << "/" << button << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onRelease(int x, int y, int button)
+{
+//	cout << "Panel " << mParamName << " released! " << x << "/" << y << "/" << button << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onReleaseOutside(int x, int y, int button)
+{
+//	cout << "Panel " << mParamName << " released outside! " << x << "/" << y << "/" << button << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::onDropOver(int x, int y, int button, ofxGuiObject* object) {
+//	cout << "just recieved the object called " << object->mParamName << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::keyPressed( int key )
+{
+//	cout << "Panel " << mParamName << " key pressed! " << key << endl;
+
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::keyReleased( int key )
+{
+//	cout << "Panel " << mParamName << " key released! " << key << endl;
+}
+
+
+
+
+//--------------------------------------------------------------
+void ofxGuiPanel::toggleMaxMin()
+{
+	if(isMinimized) {
+		maximize();		
+	} else {
+		minimize();
 	}
 	
-	return handled;
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
 
-bool ofxGuiPanel::mousePressed(int x, int y, int button)
+void ofxGuiPanel::maximize() {
+	cout << "MAXIMIZED" << endl;
+	
+	minMaxButton->mValue=1;
+	
+	isMinimized = false;
+	setHitRegion(0, 0, width, height);
+}
+
+//--------------------------------------------------------------
+void ofxGuiPanel::minimize() {
+	cout << "MINIMIZED" << endl;
+	
+	minMaxButton->mValue=0;
+	
+	isMinimized = true;
+	setHitRegion(0, 0, minimizedRect.width, minimizedRect.height);
+}
+
+
+
+
+ofxGuiSlider* ofxGuiPanel::addSlider(string _name, 
+                                     int _width, int _height, 
+                                     float _min, float _max, 
+                                     float _value, 
+                                     int _display, 
+                                     int _steps)
 {
-	bool		handled	= false;
-	ofxPoint2f	inside	= mouseToLocal(x, y);
-	
-	if(isPointInsideMe(inside))
-	{		
-		ofxGuiObject* tmpObj;
-		
-		for(int i = 0; i < mObjects.size(); i++)
-		{
-			tmpObj	= (ofxGuiObject*)mObjects.at(i);
-			handled	= tmpObj->mousePressed(inside.x, inside.y, button);
-			
-			if(handled)
-				break;
-		}
-		
-		mMouseIsDown = true;
-	}
-	
-	return handled;
+	ofxGuiSlider* obj = new ofxGuiSlider();
+	obj->init(_name, mBorder, height - mBorder + getOffset(), _width, _height, _min, _max, _value, _display, _steps);
+	addChild(obj);
+	return obj;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-bool ofxGuiPanel::mouseReleased(int x, int y, int button)
+//--------------------------------------------------------------
+/*
+ofxGuiXYPad* ofxGuiPanel::addXYPad(string _name, int _width, int _height, ofxPoint2f _min, ofxPoint2f _max, ofxPoint2f _value, int _display, int _steps)
 {
-	bool		handled	= false;
-	ofxPoint2f	inside	= mouseToLocal(x, y);
-	
-	ofxGuiObject* tmpObj;
-	
-	for(int i = 0; i < mObjects.size(); i++)
-	{
-		tmpObj	= (ofxGuiObject*)mObjects.at(i);
-		handled	= tmpObj->mouseReleased(inside.x, inside.y, button);
-		
-		if(handled)
-			break;
-	}
-	
-	mMouseIsDown = false;
-	
-	return handled;
+	ofxGuiXYPad* obj = new ofxGuiXYPad();
+	obj->init(_name, mBorder, height - mBorder + getOffset(), _width, _height, _min, _max, _value, _display, _steps);
+	addChild(obj);
+	return obj;
 }
+*/
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiSlider* ofxGuiPanel::addSlider(int id, string name, int width, int height, float min, float max, float value, int display, int steps)
+//--------------------------------------------------------------
+/*
+ofxGuiPoints* ofxGuiPanel::addPoints(string _name, int _width, int _height, ofxPoint2f _min, ofxPoint2f _max, ofxPoint2f _value, int _display, int _steps)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-	
-	ofxGuiSlider* slider = new ofxGuiSlider();
-	slider->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, min, max, value, display, steps);
-	mObjects.push_back(slider);
-
-	adjustToNewContent(slider->mObjWidth, slider->mObjHeight + offset);
-	
-	return slider;
+	ofxGuiPoints* obj = new ofxGuiPoints();
+	obj->init(_name, mBorder, height - mBorder + getOffset(), _width, _height, _min, _max, _value, _display, _steps);
+	addChild(obj);
+	return obj;
 }
+*/
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiXYPad* ofxGuiPanel::addXYPad(int id, string name, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps)
+//--------------------------------------------------------------
+ofxGuiButton* ofxGuiPanel::addButton(string _name, int _width, int _height, int _value, int _mode, string _image)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-
-	ofxGuiXYPad* xypad = new ofxGuiXYPad();
-	xypad->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, min, max, value, display, steps);
-	mObjects.push_back(xypad);
-	
-	adjustToNewContent(xypad->mObjWidth, xypad->mObjHeight + offset);
-	
-	return xypad;
+	ofxGuiButton* obj = new ofxGuiButton();
+	obj->init(_name, mBorder, height - mBorder + getOffset(), _width, _height, _value, _mode, _image);
+	addChild(obj);
+	return obj;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiPoints* ofxGuiPanel::addPoints(int id, string name, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps)
+//--------------------------------------------------------------
+ofxGuiButton* ofxGuiPanel::addButtonTrigger(string name)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-
-	ofxGuiPoints* points = new ofxGuiPoints();
-	points->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, min, max, value, display, steps);
-	mObjects.push_back(points);
-	
-	adjustToNewContent(points->mObjWidth, points->mObjHeight + offset);
-	
-	return points;
+	return addButton(name, OFXGUI_BUTTON_WIDTH, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Trigger, "");
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiButton* ofxGuiPanel::addButton(int id, string name, int width, int height, bool value, int mode, string image = "")
+//--------------------------------------------------------------
+ofxGuiButton* ofxGuiPanel::addButtonSwitch(string name)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-
-	ofxGuiButton* button = new ofxGuiButton();
-	button->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, value, mode, image);
-	mObjects.push_back(button);
-	
-	adjustToNewContent(button->mObjWidth, button->mObjHeight + offset);
-	
-	return button;
+	return addButton(name, OFXGUI_BUTTON_WIDTH, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch, "");
 }
 
-//	----------------------------------------------------------------------------------------------------
 
-ofxGuiFiles* ofxGuiPanel::addFiles(int id, string name, int width, int height, string value, string subPath, string suffix)
+
+//--------------------------------------------------------------
+
+/*
+ofxGuiFiles* ofxGuiPanel::addFiles(string name, int _width, int _height, string value, string subPath, string suffix)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-
-	ofxGuiFiles* files = new ofxGuiFiles();
-	files->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, value, subPath, suffix);
-	mObjects.push_back(files);
-	
-	adjustToNewContent(files->mObjWidth, files->mObjHeight + offset);
-	
-	return files;
+	ofxGuiFiles* obj = new ofxGuiFiles();
+	obj->init(name, mBorder, height - mBorder + getOffset(), _width, _height, value, subPath, suffix);
+	addChild(obj);
+	return obj;
 }
+ */
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
 
-ofxGuiColor* ofxGuiPanel::addColor(int id, string name, int width, int height, ofRGBA value, int mode)
+/*
+ofxGuiColor* ofxGuiPanel::addColor(string name, int _width, int _height, ofRGBA value, int mode)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-	
-	ofxGuiColor* color = new ofxGuiColor();
-	color->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, value, mode);
-	mObjects.push_back(color);
-	
-	adjustToNewContent(color->mObjWidth, color->mObjHeight + offset);
-	
-	return color;
+	ofxGuiColor* obj = new ofxGuiColor();
+	obj->init(name, mBorder, height - mBorder + getOffset(), _width, _height, value, mode);
+	addChild(obj);
+	return obj;
 }
+ */
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
 
-ofxGuiMatrix* ofxGuiPanel::addMatrix(int id, string name, int width, int height, int xGrid, int yGrid, int value, int mode, int spacing)
+/*
+ofxGuiMatrix* ofxGuiPanel::addMatrix(string name, int _width, int _height, int _xGrid, int _yGrid, int value, int mode, int spacing)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-	
-	ofxGuiMatrix* matrix = new ofxGuiMatrix();
-	matrix->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, xGrid, yGrid, value, mode, spacing);
-	mObjects.push_back(matrix);
-	
-	adjustToNewContent(matrix->mObjWidth, matrix->mObjHeight + offset);
-	
-	return matrix;
+	ofxGuiMatrix* obj = new ofxGuiMatrix();
+	obj->init(name, mBorder, height - mBorder + getOffset(), _width, _height, _xGrid, _yGrid, value, mode, spacing);
+	addChild(obj);
+	return obj;
 }
+*/
+ 
+//--------------------------------------------------------------
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiScope* ofxGuiPanel::addScope(int id, string name, int width, int height, int length, ofxPoint2f value, int mode)
+/*
+ofxGuiScope* ofxGuiPanel::addScope(string name, int _width, int _height, int _length, ofxPoint2f value, int mode)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-	
-	ofxGuiScope* scope = new ofxGuiScope();
-	scope->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, length, value, mode);
-	
-	mObjects.push_back(scope);
-	
-	adjustToNewContent(scope->mObjWidth, scope->mObjHeight + offset);
-	
-	return scope;
-
+	ofxGuiScope* obj = new ofxGuiScope();
+	obj->init(name, mBorder, height - mBorder + getOffset(), _width, _height, _length, value, mode);
+	addChild(obj);
+	return obj;
 }
+ */
 
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
 
-ofxGuiKnob* ofxGuiPanel::addKnob(int id, string name, int width, int height, float min, float max, float value, int display, int steps)
+/*
+ofxGuiKnob* ofxGuiPanel::addKnob(string name, int _width, int _height, int _min, int _max, float value, int display, int steps)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-	
-	ofxGuiKnob* knob = new ofxGuiKnob();
-	knob->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, min, max, value, display, steps);
-	mObjects.push_back(knob);
-	
-	adjustToNewContent(knob->mObjWidth, knob->mObjHeight + offset);
-	
-	return knob;
+	ofxGuiKnob* obj = new ofxGuiKnob();
+	obj->init(name, mBorder, height - mBorder + getOffset(), _width, _height, _min, _max, value, display, steps);
+	addChild(obj);
+	return obj;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiRadar* ofxGuiPanel::addRadar(int id, string name, int width, int height, float min, float max, float value, int display, int steps)
+//--------------------------------------------------------------
+ofxGuiRadar* ofxGuiPanel::addRadar(string name, int _width, int _height, int _min, int _max, float value, int display, int steps)
 {
 	//	todo
 	return NULL;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-ofxGuiSwitch* ofxGuiPanel::addSwitch(int id, string name, int width, int height, int min, int max, int value, const string* paramStrings)
+//--------------------------------------------------------------
+ofxGuiSwitch* ofxGuiPanel::addSwitch(string name, int _width, int _height, int _min, int _max, int value, const string* paramStrings)
 {
-	int offset = (mObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
-	
-	ofxGuiSwitch* swtch = new ofxGuiSwitch();
-	swtch->init(id, name, mBorder, mObjHeight - mBorder + offset, width, height, min, max, value, paramStrings);
-	mObjects.push_back(swtch);
-	
-	adjustToNewContent(swtch->mObjWidth, swtch->mObjHeight + offset);
-	
-	return swtch;
+	ofxGuiSwitch* obj = new ofxGuiSwitch();
+	obj->init(name, mBorder, height - mBorder + getOffset(), _width, _height, _min, _max, value, paramStrings);
+	addChild(obj);
+	return obj;
+}
+*/
+
+
+//--------------------------------------------------------------
+int	ofxGuiPanel::getOffset() {
+	return (childObjects.size() == 0 && mParamName == "") ? 0 : mSpacing;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-void ofxGuiPanel::adjustToNewContent(int width, int height)
+//--------------------------------------------------------------
+void ofxGuiPanel::adjustToNewContent(int _width, int _height)
 {
-	if(width > mObjWidth - mBorder * 2)
-		mObjWidth = width + mBorder * 2;
+	if(_width > width - mBorder * 2)
+		width = _width + mBorder * 2;
 
-	mObjHeight += height;
+	height += _height;
 	
-	setControlRegion(mBorder, mBorder, mObjWidth - mBorder, mObjHeight - mBorder);
+	minimizedRect.x = 0;
+	minimizedRect.y = 0;
+	minimizedRect.width = width;
+	minimizedRect.height = windowButtonHeight;
+	
+	// setHitRegion(0, 0, width, height);
+	//	setControlRegion(mBorder, mBorder, mObjWidth - mBorder, mObjHeight - mBorder);
+	
+	
+	
+
 }
 
-//	----------------------------------------------------------------------------------------------------
+void ofxGuiPanel::addChild(ofxGuiObject* obj) {
+	adjustToNewContent(obj->width, obj->height + getOffset());
+	childObjects.push_back(obj);
+	obj->parentObject = this;
+}
 
+
+//--------------------------------------------------------------
 void ofxGuiPanel::buildFromXml()
 {
+	
+	/*
 	int numberOfTags = mGlobals->mXml.getNumTags("OBJECT");
 	
 	if(numberOfTags > 0)
@@ -363,7 +546,7 @@ void ofxGuiPanel::buildFromXml()
 		{
 			mGlobals->mXml.pushTag("OBJECT", i);
 
-			int		id		= mGlobals->mXml.getValue("ID", 0);
+			//int		id		= mGlobals->mXml.getValue("ID", 0);
 			string	type	= mGlobals->mXml.getValue("TYPE", "");
 			string	name	= mGlobals->mXml.getValue("NAME", "");
 			int		width	= mGlobals->mXml.getValue("WIDTH", 0);
@@ -379,7 +562,7 @@ void ofxGuiPanel::buildFromXml()
 				float	max		= mGlobals->mXml.getValue("MAX", 0.0f);
 				float	value	= mGlobals->mXml.getValue("VALUE", 0.0f);
 
-				ofxGuiSlider* slider = addSlider(id, name, width, height, min, max, value, display, steps);
+				ofxGuiSlider* slider = addSlider(name, width, height, min, max, value, display, steps);
 				slider->buildFromXml();
 			}
 			else if(type == "XYPAD")
@@ -395,7 +578,7 @@ void ofxGuiPanel::buildFromXml()
 				ofxPoint2f max	= ofxPoint2f(maxx, maxy);
 				ofxPoint2f value	= ofxPoint2f(valuex, valuey);
 				
-				ofxGuiXYPad* xypad = addXYPad(id, name, width, height, min, max, value, display, steps);
+				ofxGuiXYPad* xypad = addXYPad(name, width, height, min, max, value, display, steps);
 				xypad->buildFromXml();
 			}
 			else if(type == "POINTS")
@@ -411,14 +594,14 @@ void ofxGuiPanel::buildFromXml()
 				ofxPoint2f max	= ofxPoint2f(maxx, maxy);
 				ofxPoint2f value	= ofxPoint2f(valuex, valuey);
 				
-				ofxGuiPoints* points = addPoints(id, name, width, height, min, max, value, display, steps);
+				ofxGuiPoints* points = addPoints(name, width, height, min, max, value, display, steps);
 				points->buildFromXml();
 			}
 			else if(type == "BUTTON")
 			{
 				bool value = mGlobals->mXml.getValue("VALUE", 0);
 				
-				ofxGuiButton* button = addButton(id, name, width, height, value, mode, image);
+				ofxGuiButton* button = addButton(name, width, height, value, mode, image);
 				button->buildFromXml();
 			}
 			else if(type == "FILES")
@@ -426,14 +609,14 @@ void ofxGuiPanel::buildFromXml()
 				string	subPath	= mGlobals->mXml.getValue("SUBPATH", "");
 				string	suffix	= mGlobals->mXml.getValue("SUFFIX", "");
 				
-				ofxGuiFiles* files = addFiles(id, name, width, height, mGlobals->mXmlfile, subPath, suffix);
+				ofxGuiFiles* files = addFiles(name, width, height, mGlobals->mXmlfile, subPath, suffix);
 				files->buildFromXml();
 			}
 			else if(type == "COLOR")
 			{
 				ofRGBA value = ofRGBA(mGlobals->mXml.getValue("VALUE", "FFFFFFFF"));
 				
-				ofxGuiColor* color = addColor(id, name, width, height, value, mode);
+				ofxGuiColor* color = addColor(name, width, height, value, mode);
 				color->buildFromXml();
 			}
 			else if(type == "MATRIX")
@@ -443,7 +626,7 @@ void ofxGuiPanel::buildFromXml()
 				int	value	= mGlobals->mXml.getValue("VALUE", 0);
 				int	spacing	= mGlobals->mXml.getValue("SPACING", 0);
 				
-				ofxGuiMatrix* matrix = addMatrix(id, name, width, height, xGrid, yGrid, value, mode, spacing);
+				ofxGuiMatrix* matrix = addMatrix(name, width, height, xGrid, yGrid, value, mode, spacing);
 
 				matrix->buildFromXml();
 			}
@@ -454,7 +637,7 @@ void ofxGuiPanel::buildFromXml()
 				float		valuey	= mGlobals->mXml.getValue("VALUE_Y", 0.0f);
 				ofxPoint2f	value	= ofxPoint2f(valuex, valuey);
 				
-				ofxGuiScope* scope = addScope(id, name, width, height, length, value, mode);
+				ofxGuiScope* scope = addScope(name, width, height, length, value, mode);
 				scope->buildFromXml();
 			}
 			else if(type == "KNOB")
@@ -463,7 +646,7 @@ void ofxGuiPanel::buildFromXml()
 				float	max		= mGlobals->mXml.getValue("MAX", 0.0f);
 				float	value	= mGlobals->mXml.getValue("VALUE", 0.0f);
 				
-				ofxGuiKnob* knob = addKnob(id, name, width, height, min, max, value, display, steps);
+				ofxGuiKnob* knob = addKnob(name, width, height, min, max, value, display, steps);
 				knob->buildFromXml();
 			}
 			else if(type == "SWITCH")
@@ -474,17 +657,17 @@ void ofxGuiPanel::buildFromXml()
 				
 				//	const string* strings = 
 				
-				ofxGuiSwitch* swtch = addSwitch(id, name, width, height, min, max, value, NULL);
+				ofxGuiSwitch* swtch = addSwitch(name, width, height, min, max, value, NULL);
 				swtch->buildFromXml();
 			}
 			
 			mGlobals->mXml.popTag();
 		}
 	}
+	 */
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiPanel::saveToXml()
 {
 	ofxGuiObject* tmpObj;
@@ -495,13 +678,14 @@ void ofxGuiPanel::saveToXml()
 	mGlobals->mXml.setValue("OBJECT:SPACING", mSpacing, id);
 	mGlobals->mXml.pushTag("OBJECT", id);
 	
-	for(int i = 0; i < mObjects.size(); i++)
+	for(int i = 0; i < childObjects.size(); i++)
 	{
-		tmpObj = (ofxGuiObject*)mObjects.at(i);
+		tmpObj = (ofxGuiObject*)childObjects.at(i);
 		tmpObj->saveToXml();
 	}
 	
 	mGlobals->mXml.popTag();
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
+

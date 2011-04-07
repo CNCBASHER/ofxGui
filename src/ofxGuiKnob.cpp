@@ -32,11 +32,11 @@ ofxGuiKnob::ofxGuiKnob()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiKnob::init(int id, string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps)
+void ofxGuiKnob::init(/*int id,*/ string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -68,7 +68,7 @@ void ofxGuiKnob::setValue(float value)
 		if (mDisplay == kofxGui_Display_String && value != mValue)
 		{
 			int id = (int)value;
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
 		}
 	}
 	
@@ -86,6 +86,7 @@ void ofxGuiKnob::setRange(float min, float max)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiKnob::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -102,6 +103,7 @@ bool ofxGuiKnob::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -124,7 +126,7 @@ void ofxGuiKnob::draw()
 	float	angle, step, cosine, sine, xpos, ypos;
 	
 	if(mParamName != "")
-		drawParamString(x, 0.0, mParamName, true);
+		drawParamString(roundInt(x), 0.0, mParamName, true);
 	
 	ofFill();
 	
@@ -205,6 +207,12 @@ void ofxGuiKnob::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -222,7 +230,7 @@ bool ofxGuiKnob::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			setValue(value);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
 			
 			mFirstHit = point;
 		}
@@ -261,9 +269,18 @@ bool ofxGuiKnob::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiKnob::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiKnob::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiKnob::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
 }
 
 //	----------------------------------------------------------------------------------------------------
@@ -296,17 +313,21 @@ float ofxGuiKnob::fractionToValue(float fraction)
 void ofxGuiKnob::drawValueString(float x, float y, string text)
 {
 	glColor4f(mGlobals->mTextColor.r, mGlobals->mTextColor.g, mGlobals->mTextColor.b, mGlobals->mTextColor.a);
+
 	
 	x -= roundInt(mGlobals->mParamFont.stringWidth(text) / 2.0f);
-	mGlobals->mParamFont.drawString(text, x, y);
+	
+	//cout << x << "<<X " << y << "Y" << endl;
+	
+	mGlobals->mParamFont.drawString(text, roundInt(x), roundInt(y));
 	
 	//	debug rect to position font
-	/*
+	
 	 ofRectangle rect = mGlobals->mParamFont.getStringBoundingBox(text, x, y);
 	 ofNoFill();
 	 glColor4f(1.0, 0.0, 0.0, 1.0);
 	 ofRect(x, y, rect.width, mGlobals->mParamFontHeight);
-	 */
+	
 }
 
 //	----------------------------------------------------------------------------------------------------

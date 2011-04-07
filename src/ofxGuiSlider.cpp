@@ -19,42 +19,46 @@
  *
  */
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 #include "ofxGuiSlider.h"
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 ofxGuiSlider::ofxGuiSlider()
 {
 	mParamType = kofxGui_Object_Slider;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-void ofxGuiSlider::init(int id, string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps)
+//--------------------------------------------------------------
+void ofxGuiSlider::init(/*int id,*/ string _name, int _x, int _y, int _width, int _height, float _min, float _max, float _value, int _display, int _steps)
 {
-	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
+	int	textHeight	= (_name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
-	mParamName		= name;
+	//mParamId		= id;
+	mParamName		= _name;
 
-	mObjX			= x; 
-	mObjY			= y;
+	x               = _x; 
+	y               = _y;
 	
-	mObjWidth		= width;
-	mObjHeight		= textHeight + height;
+	width           = _width;
+	height          = textHeight + _height; // text height + slider height
 	
-	mDisplay		= display;
-	mSteps			= steps;
+	mDisplay		= _display;
+	mSteps			= _steps;
 			
-	setRange(min, max);
-	setValue(value);
-	setControlRegion(0, textHeight, width, height);
+	setRange(_min, _max);
+	setValue(_value);
+    
+    // custom, just for the button itself
+	setHitRegion(0, // no x offset 
+                 textHeight,  // move control region down below text
+                 width,       // the full width
+                 height);    // the intended height
+
+    
+    
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiSlider::setValue(float value)
 {
 	if(mSteps > 1)
@@ -68,15 +72,18 @@ void ofxGuiSlider::setValue(float value)
 		if (mDisplay == kofxGui_Display_String && value != mValue)
 		{
 			int id = (int)value;
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
-		}
+            
+		
+        }
 	}
 	
 	mValue = value;	
+    
+    ofNotifyEvent(ofxGuiSliderEvent, mValue, this);
+
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiSlider::setRange(float min, float max) 
 {
 	mMinVal	= min;
@@ -84,31 +91,12 @@ void ofxGuiSlider::setRange(float min, float max)
 	mValDlt	= mMaxVal - mMinVal;
 }
 
-//	----------------------------------------------------------------------------------------------------
 
-bool ofxGuiSlider::update(int id, int task, void* data, int length)
-{
-	bool handled = false;
-	
-	if(id == mParamId)
-	{
-		if(task == kofxGui_Set_Float)
-			setValue(*(float*)data);
-		else if(task == kofxGui_Set_String)
-			mDisplaySting = *(string*)data;
-		
-		handled = true;
-	}
-	
-	return handled;
-}
-
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiSlider::draw()
 {
 	glPushMatrix();
-		glTranslatef(mObjX, mObjY, 0.0);
+		glTranslatef(x, y, 0.0);
 	
 		if(mParamName != "")
 		{
@@ -116,37 +104,134 @@ void ofxGuiSlider::draw()
 				drawParamString(0.0, 0.0, mParamName + ": " + mDisplaySting, false);
 			}
 			    
-			else
+			else {
 				drawParamString(0.0, 0.0, mParamName + ": " + floatToString(mValue, mDisplay), false);
+            }
 		}
+    
+        
+    
 	
-		float x = (mCtrWidth * valueToFraction(mValue));
+		float xx = (cRect.width * valueToFraction(mValue));
 	
 		ofFill();
 	
 		//	background
 		glColor4f(mGlobals->mCoverColor.r, mGlobals->mCoverColor.g, mGlobals->mCoverColor.b, mGlobals->mCoverColor.a);
-		ofRect(mCtrX, mCtrY, mCtrWidth, mCtrHeight);
+		ofRect(cRect.x, cRect.y, cRect.width, cRect.height);
 
 		//	action
 		glColor4f(mGlobals->mSliderColor.r, mGlobals->mSliderColor.g, mGlobals->mSliderColor.b, mGlobals->mSliderColor.a);
-		ofRect(mCtrX, mCtrY, x, mCtrHeight);
+		ofRect(cRect.x, cRect.y, xx, cRect.height);
 
-		//	handle
+
+   
+
+    //	handle
 		glColor4f(mGlobals->mHandleColor.r, mGlobals->mHandleColor.g, mGlobals->mHandleColor.b, mGlobals->mHandleColor.a);
-		ofRect(x, mCtrY, 1.0, mCtrHeight);
+		ofRect(xx+1, cRect.y, 1.0, cRect.height);
 		
 		ofNoFill();
 
-		//	frame
+    //	frame
 		glColor4f(mGlobals->mFrameColor.r, mGlobals->mFrameColor.g, mGlobals->mFrameColor.b, mGlobals->mFrameColor.a);
-		ofRect(mCtrX, mCtrY, mCtrWidth, mCtrHeight);
+		ofRect(cRect.x, cRect.y, cRect.width, cRect.height);
 	
+    
+    ofSetColor(255,255,0);
+    ofNoFill();
+    ofRect(0,0,width,height);
+    
+    
 	glPopMatrix();
 }
 
-//	----------------------------------------------------------------------------------------------------
+/*
+//--------------------------------------------------------------
+ofxGuiObject* ofxGuiSlider::mouseMoved(int x, int y)
+{
+	return NULL;
+}
+*/
 
+void ofxGuiSlider::onRollOver(int x, int y) {
+    cout << "slider got rollover!!" << endl;
+    
+}
+
+void ofxGuiSlider::onRollOut() {
+    cout << "slider got rollout!!" << endl;
+    
+}
+
+void ofxGuiSlider::onMouseMove(int x, int y) {
+    
+}
+
+void ofxGuiSlider::sliderDragging(int x, int y, int button) {
+    ofxPoint2f screenPos = getScreenPosition();
+    
+    int xx = CLAMP(screenToLocal(ofxPoint2f(x, y)).x,0,cRect.width);
+    
+    float _value = fractionToValue( xx / (width));
+    
+    cout << "SLIDER GOT DRAG OVER " 
+    << screenPos.x << "x" << screenPos.y
+    << " {} " 
+    << xx << " // " 
+    << y << "| isDragging " 
+    << isDragging << "|" 
+    << _value << "|"
+    << mValDlt << "|"
+    << mMinVal << "|" 
+    << endl;
+    
+    
+    //return (mValDlt * fraction) + mMinVal;
+    
+    
+    
+    if(_value != mValue)
+    {
+        setValue(_value);
+    }
+}
+
+
+void ofxGuiSlider::onDragOver(int x, int y, int button) {
+    if(isDragging) {
+        sliderDragging(x,y,button);
+    }
+    
+}
+
+void ofxGuiSlider::onDragOutside(int x, int y, int button) {
+    if(isDragging) {
+        sliderDragging(x,y,button);
+    }
+}
+
+
+void ofxGuiSlider::onPress(int x, int y, int button) {
+    cout << "SLIDER GOT PRESS " << x << " // " << y << endl;
+
+}
+
+void ofxGuiSlider::onPressOutside(int x, int y, int button) {
+    cout << "SLIDER GOT PRESS OUTSIDE " << x << " // " << y << endl;
+}
+
+void ofxGuiSlider::onRelease(int x, int y, int button) {
+    cout << "SLIDER GOT RELEASE " << x << " // " << y << endl;
+}
+
+void ofxGuiSlider::onReleaseOutside(int x, int y, int button) {
+    cout << "SLIDER GOT RELEASE OUTSIDE " << x << " // " << y << endl;
+}
+
+
+/*
+//--------------------------------------------------------------
 bool ofxGuiSlider::mouseDragged(int x, int y, int button)
 {
 	if(mMouseIsDown)
@@ -156,15 +241,14 @@ bool ofxGuiSlider::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			setValue(value);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
 		}
 	}
 	
 	return mMouseIsDown;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 bool ofxGuiSlider::mousePressed(int x, int y, int button)
 {
 	mMouseIsDown = isPointInsideMe(mouseToLocal(x, y));
@@ -175,8 +259,7 @@ bool ofxGuiSlider::mousePressed(int x, int y, int button)
 	return mMouseIsDown;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 bool ofxGuiSlider::mouseReleased(int x, int y, int button)
 {
 	bool handled = mMouseIsDown;
@@ -186,16 +269,25 @@ bool ofxGuiSlider::mouseReleased(int x, int y, int button)
 	
 	return handled;
 }
+ 
+ */
 
-//	----------------------------------------------------------------------------------------------------
+/*
 
+//--------------------------------------------------------------
+bool ofxGuiSlider::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//--------------------------------------------------------------
+bool ofxGuiSlider::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+*/
+ 
+//--------------------------------------------------------------
 void ofxGuiSlider::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiSlider::saveToXml()
 {
 	int id = saveObjectData();
@@ -205,18 +297,17 @@ void ofxGuiSlider::saveToXml()
 	mGlobals->mXml.setValue("OBJECT:VALUE", mValue, id);
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 float ofxGuiSlider::valueToFraction(float value)
 {
 	return (value - mMinVal) / mValDlt;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 float ofxGuiSlider::fractionToValue(float fraction)
 {
 	return (mValDlt * fraction) + mMinVal;
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
+

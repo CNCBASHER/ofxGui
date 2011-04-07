@@ -19,51 +19,53 @@
  *
  */
 
-//	----------------------------------------------------------------------------------------------------
+#pragma once
 
-#ifndef OFX_GUI_TYPES
-#define OFX_GUI_TYPES
-
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 #include "ofxXmlSettings.h"
 #include "ofxVectorMath.h"
 #include "ofxDirList.h"
 
-
 #include "ofMain.h"
 
-//	----------------------------------------------------------------------------------------------------
-
-#define OFXGUI_VERSION			"0.11" //tentative versioning; bilderbuchi
+//--------------------------------------------------------------
+#define OFXGUI_VERSION			"0.2" //tentative versioning; bilderbuchi
 #define OFXGUI_XML				"ofxGui.xml"
 
 #define OFXGUI_PANEL_BORDER		10
 #define OFXGUI_PANEL_SPACING	10
 
 #define OFXGUI_BUTTON_HEIGHT	10
+#define OFXGUI_BUTTON_WIDTH		10
 #define OFXGUI_FILES_HEIGHT		15	
 #define OFXGUI_SLIDER_HEIGHT	10
 #define OFXGUI_COLOR_HEIGHT		30
 #define OFXGUI_MATRIX_SPACING	 6
 
-//	----------------------------------------------------------------------------------------------------
+#define OFXGUI_STEPS			256
 
+
+
+//--------------------------------------------------------------
 static const char* kofxGui_Tags[] =
 {
-	"UI",
-	"PANEL",
-	"SLIDER",
-	"XYPAD",
-	"POINTS",
-	"BUTTON",
-	"FILES",
-	"COLOR",
-	"MATRIX",
-	"SCOPE",
-	"KNOB",
-	"RADAR",
-	"SWITCH",
+	"UI",			// kofxGui_Object_Base
+	"PANEL",		// kofxGui_Object_Panel
+	"SLIDER",		// kofxGui_Object_Slider
+	"XYPAD",		// kofxGui_Object_XYPad
+	"POINTS",		// kofxGui_Object_Points
+	"BUTTON",		// kofxGui_Object_Button
+	"FILES",		// kofxGui_Object_Files
+	"COLOR",		// kofxGui_Object_Color
+	"MATRIX",		// kofxGui_Object_Matrix
+	"SCOPE",		// kofxGui_Object_Scope
+	"KNOB",			// kofxGui_Object_Knob
+	"RADAR",		// kofxGui_Object_Radar
+	"SWITCH",		// kofxGui_Object_Switch
+	
+	"GALLERY",		// kofxGui_Object_Gallery
+	"GALLERY_ITEM",	// kofxGui_Object_Gallery_Item
+	
 };
 
 enum
@@ -81,6 +83,10 @@ enum
 	kofxGui_Object_Knob,
 	kofxGui_Object_Radar,
 	kofxGui_Object_Switch,
+	
+	kofxGui_Object_Gallery,
+	kofxGui_Object_Gallery_Item,
+	
 };
 
 enum
@@ -113,7 +119,7 @@ enum
 	kofxGui_Matrix_Selected,
 };
 
-enum
+enum ofxGuiTask
 {
 	kofxGui_Get_Bool,
 	kofxGui_Get_Int,
@@ -137,8 +143,8 @@ enum
 	kofxGui_Set_PointArray,
 };
 
-//	----------------------------------------------------------------------------------------------------
 
+//--------------------------------------------------------------
 static inline int roundInt(float value)
 {
 	return (int)(value + 0.5f);
@@ -151,6 +157,8 @@ static inline float linear(float fract, float x0, float x1)
 
 // -----------------------------------------------------------------------------
 
+//class ofxGuiObject;
+
 class ofxGuiListener
 { 
 public:
@@ -158,8 +166,10 @@ public:
 	void setupGui(ofEventArgs & args){
 		setupGui();
 	}
+	
 	virtual void setupGui(){}
 	virtual void handleGui(int parameterId, int task, void* data, int length){}
+	//virtual void handleGui(ofxGuiObject* obj){};
 };
 
 // -----------------------------------------------------------------------------
@@ -183,6 +193,8 @@ public:
 		value	= _value;
 	}
 };
+
+
 
 // -----------------------------------------------------------------------------
 
@@ -349,8 +361,5 @@ public:
 	}
 };
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
 
-#endif
-
-//	----------------------------------------------------------------------------------------------------

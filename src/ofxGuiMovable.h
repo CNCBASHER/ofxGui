@@ -48,6 +48,13 @@ public:
 	void			mouseReleased(int x, int y, int button);
 	void			mouseReleased(ofMouseEventArgs & args);
 
+	void			keyPressed(int key);
+	void			keyPressed(ofKeyEventArgs & args);
+
+	void			keyReleased(int key);
+	void			keyReleased(ofKeyEventArgs & args);
+
+	
 private:
 
 	ofxGui*			gui;

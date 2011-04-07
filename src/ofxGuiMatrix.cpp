@@ -43,11 +43,11 @@ ofxGuiMatrix::~ofxGuiMatrix()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiMatrix::init(int id, string name, int x, int y, int width, int height, int xGrid, int yGrid, int value, int mode, int spacing)
+void ofxGuiMatrix::init(string name, int x, int y, int width, int height, int xGrid, int yGrid, int value, int mode, int spacing)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -73,7 +73,7 @@ void ofxGuiMatrix::init(int id, string name, int x, int y, int width, int height
 	
 	memset(mBuffer, 0, sizeof(int) * mBufferLength);
 
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_IntArray, mBuffer, mBufferLength);
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_IntArray, mBuffer, mBufferLength);
 }
 
 //	----------------------------------------------------------------------------------------------------
@@ -85,6 +85,7 @@ void ofxGuiMatrix::setValue(int value)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiMatrix::update(int id, int task, void* data, int length)
 {
 	bool	handled	= false;
@@ -103,11 +104,12 @@ bool ofxGuiMatrix::update(int id, int task, void* data, int length)
 	if(value != mValue)
 	{
 		ofCell outVal = ofCell(mValue, mBuffer[mValue]);
-		mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Cell, &outVal, sizeof(ofCell));
+		//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Cell, &outVal, sizeof(ofCell));
 	}
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -182,6 +184,12 @@ void ofxGuiMatrix::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -211,7 +219,7 @@ bool ofxGuiMatrix::mousePressed(int x, int y, int button)
 		setValue(id);
 		
 		ofCell outVal = ofCell(mValue, mBuffer[mValue]);
-		mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Cell, &outVal, sizeof(ofCell));
+		//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Cell, &outVal, sizeof(ofCell));
 	}
 	
 	return mMouseIsDown;
@@ -228,7 +236,7 @@ bool ofxGuiMatrix::mouseReleased(int x, int y, int button)
 		if(mMode == kofxGui_Button_Trigger)
 		{
 			mBuffer[mValue] ^= kofxGui_Matrix_Set;	//	= 0;
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
 		}
 		
 		mMouseIsDown = false;
@@ -236,6 +244,14 @@ bool ofxGuiMatrix::mouseReleased(int x, int y, int button)
 	
 	return handled;
 }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiMatrix::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiMatrix::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -261,7 +277,7 @@ void ofxGuiMatrix::buildFromXml()
 		}
 	}
 
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
 }
 
 //	----------------------------------------------------------------------------------------------------

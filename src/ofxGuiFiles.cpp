@@ -32,11 +32,11 @@ ofxGuiFiles::ofxGuiFiles()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiFiles::init(int id, string name, int x, int y, int width, int height, string value, string path, string suffix)
+void ofxGuiFiles::init(/*int id, */string name, int x, int y, int width, int height, string value, string path, string suffix)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	/*mParamId		= id;*/
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -81,6 +81,7 @@ void ofxGuiFiles::setValue(string value)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiFiles::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -103,6 +104,7 @@ bool ofxGuiFiles::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -133,9 +135,17 @@ void ofxGuiFiles::draw()
 	glPopMatrix();
 }
 
+
 //	----------------------------------------------------------------------------------------------------
 
-bool ofxGuiFiles::mouseDragged(int x, int y, int button)
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
+
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseDragged(int x, int y, int button)
 {
 	if(mMouseIsDown && mNumberOfFiles > 0)
 	{
@@ -148,7 +158,7 @@ bool ofxGuiFiles::mouseDragged(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
-bool ofxGuiFiles::mousePressed(int x, int y, int button)
+ofxGuiObject* ofxGuiFiles::mousePressed(int x, int y, int button)
 {
 	mMouseIsDown = isPointInsideMe(mouseToLocal(x, y));
 	
@@ -163,14 +173,14 @@ bool ofxGuiFiles::mousePressed(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
-bool ofxGuiFiles::mouseReleased(int x, int y, int button)
+ofxGuiObject* ofxGuiFiles::mouseReleased(int x, int y, int button)
 {
 	bool handled = mMouseIsDown;
 
 	if(mMouseIsDown)
 	{
 		if(isPointInsideMe(mouseToLocal(x, y)))
-		   mGlobals->mListener->handleGui(mParamId, kofxGui_Set_String, &mValue, sizeof(string));
+			int g = 0;// mGlobals->mListener->handleGui(mParamId, kofxGui_Set_String, &mValue, sizeof(string));
 		else
 		   mValue = mMemory;
 		   
@@ -182,9 +192,17 @@ bool ofxGuiFiles::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+ofxGuiObject* ofxGuiFiles::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiFiles::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_String, &mValue, sizeof(string));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_String, &mValue, sizeof(string));
 }
 
 //	----------------------------------------------------------------------------------------------------

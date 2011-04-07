@@ -38,17 +38,19 @@ class ofxGuiKnob : public ofxGuiObject
 		
 		ofxGuiKnob();
 		
-		void		init(int id, string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps);
+		void		init(/*int id,*/ string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps);
 		
 		void		setValue(float value);
 		void		setRange(float min, float max);
 		
-		bool		update(int id, int task, void* data, int length);
 		void		draw();
-		
-		bool		mouseDragged(int x, int y, int button);
-		bool		mousePressed(int x, int y, int button);
-		bool		mouseReleased(int x, int y, int button);
+
+		ofxGuiObject*	mouseMoved(int x, int y);
+		ofxGuiObject*	mouseDragged(int x, int y, int button);
+		ofxGuiObject*	mousePressed(int x, int y, int button);
+		ofxGuiObject*	mouseReleased(int x, int y, int button);
+		ofxGuiObject*	keyPressed(int key);
+		ofxGuiObject*	keyReleased(int key);
 		
 		void		buildFromXml();
 		void		saveToXml();
@@ -59,8 +61,9 @@ class ofxGuiKnob : public ofxGuiObject
 		void		drawValueString(float x, float y, string text);
 
 		float		mValue, mMinVal, mMaxVal, mValDlt;
+		
 		ofxPoint2f	mFirstHit;
-	};
+};
 
 //	----------------------------------------------------------------------------------------------------
 

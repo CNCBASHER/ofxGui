@@ -32,11 +32,11 @@ ofxGuiXYPad::ofxGuiXYPad()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiXYPad::init(int id, string name, int x, int y, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps)
+void ofxGuiXYPad::init(/*int id,*/ string name, int x, int y, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 
 	mObjX			= x; 
@@ -71,6 +71,7 @@ void ofxGuiXYPad::setRange(ofxPoint2f min, ofxPoint2f max)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiXYPad::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -83,6 +84,7 @@ bool ofxGuiXYPad::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -126,6 +128,12 @@ void ofxGuiXYPad::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -138,7 +146,7 @@ bool ofxGuiXYPad::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			setValue(value);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
 		}
 	}
 	
@@ -171,9 +179,17 @@ bool ofxGuiXYPad::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiXYPad::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiXYPad::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiXYPad::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
 }
 
 //	----------------------------------------------------------------------------------------------------

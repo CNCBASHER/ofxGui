@@ -19,70 +19,74 @@
  *
  */
 
-//	----------------------------------------------------------------------------------------------------
 
-#ifndef OFX_GUI_GLOBALS
-#define OFX_GUI_GLOBALS
+#pragma once
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 #include "ofxGuiTypes.h"
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 class ofxGuiGlobals
 {
 		
-public:
+	public:
+		
+		static			ofxGuiGlobals* Instance();
+		
+		//ofxGuiGlobals();
+		//~ofxGuiGlobals();
 	
-	static			ofxGuiGlobals* Instance();
-	
-	void			buildFromXml();
-	void			saveToXml();
+		void			buildFromXml();
+		void			saveToXml();
 
-	void			loadFonts();
-	
-	ofxGuiListener*	mListener;
+		void			loadFonts();
+		
+		ofxGuiListener*	mListener;
 
-	ofTrueTypeFont	mHeadFont;
-	ofTrueTypeFont	mParamFont;
-	
-	ofxXmlSettings	mXml;
-	ofxDirList		mDir;
+		ofTrueTypeFont	mHeadFont;
+		ofTrueTypeFont	mParamFont;
+		ofTrueTypeFont	mTooltipFont;
+		
+		ofxXmlSettings	mXml;
+		ofxDirList		mDir;
 
-	string			mXmlfile;
-	
-	string			mHeadFontName;
-	int				mHeadFontSize;
-	int				mHeadFontXOffset;
-	int				mHeadFontYOffset;
-	int				mHeadFontHeight;
-	
-	string			mParamFontName;
-	int				mParamFontSize;
-	int				mParamFontXOffset;
-	int				mParamFontYOffset;
-	int				mParamFontHeight;
+		string			mXmlfile;
+		
+		string			mHeadFontName;
+		int				mHeadFontSize;
+		int				mHeadFontXOffset;
+		int				mHeadFontYOffset;
+		int				mHeadFontHeight;
+		
+		string			mParamFontName;
+		int				mParamFontSize;
+		int				mParamFontXOffset;
+		int				mParamFontYOffset;
+		int				mParamFontHeight;
 
-	int				mButtonXText;
-	int				mButtonYText;
+		string			mTooltipFontName;
+		int				mTooltipFontSize;
+		int				mTooltipFontXOffset;
+		int				mTooltipFontYOffset;
+		int				mTooltipFontHeight;
+		
+		int				mButtonXText;
+		int				mButtonYText;
+		
+		int				mFilesXText;
+		int				mFilesYText;
+		
+		int				mPointSize;
+		
+		int				mKnobSize;
+		
+		ofRGBA			mCoverColor, mTextColor, mBorderColor, mFrameColor, mSliderColor, mAxisColor, mHandleColor, mButtonColor, mCurveColor, mScopeColor, mMatrixColor;
+		ofRGBA			mDisabledColor;
 	
-	int				mFilesXText;
-	int				mFilesYText;
-	
-	int				mPointSize;
-	
-	int				mKnobSize;
-	
-	ofRGBA			mCoverColor, mTextColor, mBorderColor, mFrameColor, mSliderColor, mAxisColor, mHandleColor, mButtonColor, mCurveColor, mScopeColor, mMatrixColor;
-
-private:
-	
-	ofxGuiGlobals();	
+	private:
+		
+		ofxGuiGlobals();	
 };
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
 
-#endif
-
-//	----------------------------------------------------------------------------------------------------

@@ -49,27 +49,43 @@ void ofxGuiMovable::mouseDragged(ofMouseEventArgs & args){
 //	----------------------------------------------------------------------------------------------------
 
 void ofxGuiMovable::mousePressed(int x, int y, int button){
+	
 	obj = NULL;
-	for(int i=0; i<gui->mObjects.size(); i++){
+	
+	// iterate through backwards to make sure the ordering is respected
+	for(int i = gui->mObjects.size() - 1; i >= 0; i--){
 		if(gui->mObjects[i]->isPointInsideMe(gui->mObjects[i]->mouseToLocal(x, y))){
 			if(gui->mObjects[i]->getTagName() == "PANEL"){
+	
 				ofxGuiPanel* panel = (ofxGuiPanel*) gui->mObjects[i];
 				ofxVec2f m = panel->mouseToLocal(x, y);
 
-				bool over = false;
-				for(int j=0; j<panel->mObjects.size(); j++){
-					if(panel->mObjects[j]->isPointInsideMe(panel->mObjects[j]->mouseToLocal(m.x, m.y))){
-						over = true;
+				if(!panel->isPointInsideMe(m.x, m.y)) {
+					// this isn't even over the panel so jump out
+					continue;
+				}
+				
+				bool overObject = false;
+				
+				// are we over an object, rather than a blank space?
+				for(int j=0; j < panel->mObjects.size(); j++){
+					
+					ofxVec2f lom = panel->mObjects[j]->mouseToLocal(m.x, m.y);
+					if(panel->mObjects[j]->isPointInsideMe(lom.x, lom.y)){
+						overObject = true;
+						break;  // jump out of the local object loop now!
 					}
 				}
-				over = panel->isPointInsideMe(m.x, m.y) && !over;
-				if(over){
+				
+				if(!overObject){
+					gui->bringToFront(i);  // make sure it's in the front
 					obj = panel;
 					break;
 				}
 			}
 		}
 	}
+	
 	px = x;
 	py = y;
 }
@@ -85,3 +101,14 @@ void ofxGuiMovable::mouseReleased(int x, int y, int button){
 void ofxGuiMovable::mouseReleased(ofMouseEventArgs & args){
 	mouseReleased(args.x, args.y, args.button);
 }
+
+//	----------------------------------------------------------------------------------------------------
+
+void ofxGuiMovable::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+void ofxGuiMovable::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+
+

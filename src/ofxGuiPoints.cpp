@@ -32,11 +32,11 @@ ofxGuiPoints::ofxGuiPoints()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiPoints::init(int id, string name, int x, int y, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps)
+void ofxGuiPoints::init(/*int id,*/ string name, int x, int y, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 
-	mParamId		= id;
+//	mParamId		= id;
 	mParamName		= name;
 
 	mObjX			= x;
@@ -82,6 +82,7 @@ void ofxGuiPoints::setRange(ofxPoint2f min, ofxPoint2f max)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiPoints::update(int id, int task, void* data, int length)
 {
 	bool		handled	= false;
@@ -101,11 +102,12 @@ bool ofxGuiPoints::update(int id, int task, void* data, int length)
 	if(value!= mValue)
 	{
 		mOutVal = bezier(mList.points, mList.points.size()-1, mList.positionToValue(mValue).x / (float) mMaxVal.x);
-		mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mOutVal, sizeof(ofxPoint2f));
+		//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mOutVal, sizeof(ofxPoint2f));
 	}
 
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -185,6 +187,12 @@ void ofxGuiPoints::draw()
 
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -223,8 +231,8 @@ bool ofxGuiPoints::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			mOutVal = mList.positionToValue(point);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mOutVal, sizeof(ofxPoint2f));
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_PointArray, &mList.points, sizeof(vector<ofxPoint2f>));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mOutVal, sizeof(ofxPoint2f));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_PointArray, &mList.points, sizeof(vector<ofxPoint2f>));
 		}
 	}
 
@@ -278,6 +286,14 @@ bool ofxGuiPoints::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiPoints::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiPoints::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiPoints::buildFromXml()
 {
 	int numberOfTags = mGlobals->mXml.getNumTags("POINT");
@@ -300,7 +316,7 @@ void ofxGuiPoints::buildFromXml()
 	}
 
 	mOutVal = mList.positionToValue(mValue);
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mOutVal, sizeof(ofxPoint2f));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mOutVal, sizeof(ofxPoint2f));
 }
 
 //	----------------------------------------------------------------------------------------------------

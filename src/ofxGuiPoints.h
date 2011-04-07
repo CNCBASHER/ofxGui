@@ -34,42 +34,44 @@
 class ofxGuiPoints : public ofxGuiObject
 {
 
-public:
+	public:
 
-	ofxGuiPoints();
+		ofxGuiPoints();
 
-	void		init(int id, string name, int x, int y, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps);
+		void		init(/*int id,*/ string name, int x, int y, int width, int height, ofxPoint2f min, ofxPoint2f max, ofxPoint2f value, int display, int steps);
 
-	void		setValue(ofxPoint2f value);
-	void		setRange(ofxPoint2f min, ofxPoint2f max);
+		void		setValue(ofxPoint2f value);
+		void		setRange(ofxPoint2f min, ofxPoint2f max);
 
-	bool		update(int id, int task, void* data, int length);
-	void		draw();
+		void		draw();
 
-	bool		mouseDragged(int x, int y, int button);
-	bool		mousePressed(int x, int y, int button);
-	bool		mouseReleased(int x, int y, int button);
-	
-	void		buildFromXml();
-	void		saveToXml();
+		ofxGuiObject*	mouseMoved(int x, int y);
+		ofxGuiObject*	mouseDragged(int x, int y, int button);
+		ofxGuiObject*	mousePressed(int x, int y, int button);
+		ofxGuiObject*	mouseReleased(int x, int y, int button);
+		ofxGuiObject*	keyPressed(int key);
+		ofxGuiObject*	keyReleased(int key);
 
-	ofxPoint2f	valueToFraction(ofxPoint2f value);
-	ofxPoint2f	fractionToValue(ofxPoint2f fraction);
-	ofxPoint2f  bezier(vector<ofxPoint2f> p,int n,float mu);
-	
-	bool		isPointWithinDistance(ofxPoint2f position);
+		void		buildFromXml();
+		void		saveToXml();
 
-	
-	float		mDistance;
-	
-	ofxPoint2f	mValue, mOutVal;
-	
-	ofxPoint2f	mMinVal;
-	ofxPoint2f	mMaxVal;
-	ofxPoint2f	mValDlt;
-	
-	ofPointList	mList;
-};
+		ofxPoint2f	valueToFraction(ofxPoint2f value);
+		ofxPoint2f	fractionToValue(ofxPoint2f fraction);
+		ofxPoint2f  bezier(vector<ofxPoint2f> p,int n,float mu);
+		
+		bool		isPointWithinDistance(ofxPoint2f position);
+
+		
+		float		mDistance;
+		
+		ofxPoint2f	mValue, mOutVal;
+		
+		ofxPoint2f	mMinVal;
+		ofxPoint2f	mMaxVal;
+		ofxPoint2f	mValDlt;
+		
+		ofPointList	mList;
+	};
 
 //	----------------------------------------------------------------------------------------------------
 

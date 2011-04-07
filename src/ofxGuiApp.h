@@ -25,14 +25,14 @@
 #include "ofxGui.h"
 #include "ofxGuiMovable.h"
 
-class ofxGuiApp : public ofBaseApp, public ofxGuiListener{
+class ofxGuiApp : public ofBaseApp, public ofxGuiListener {
 
 	public:
         ofxGuiApp() {
             mouseX = mouseY = 0;
 
 			gui = ofxGui::Instance(this);
-			mover = new ofxGuiMovable(gui);
+			//mover = new ofxGuiMovable(gui);
         }
 
 		virtual ~ofxGuiApp(){}
@@ -43,8 +43,11 @@ class ofxGuiApp : public ofBaseApp, public ofxGuiListener{
 		virtual void exit(){}
 
 		virtual void setupGui(){}
-		virtual void handleGui(int parameterId, int task, void* data, int length){}
+		//virtual void handleGui(int parameterId, int task, void* data, int length){}
 
+		virtual void handleGui(ofxGuiObject* object){}
+
+	
 
 		virtual void windowResized(int w, int h){}
 
@@ -63,7 +66,6 @@ class ofxGuiApp : public ofBaseApp, public ofxGuiListener{
 		int mouseX, mouseY;			// for processing heads
 
 		ofxGui*				gui;
-		ofxGuiMovable*      mover;
 };
 
 #endif

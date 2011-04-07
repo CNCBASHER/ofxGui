@@ -20,158 +20,248 @@
  */
 
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 #include "ofxGuiButton.h"
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 ofxGuiButton::ofxGuiButton()
 {
 	mParamType = kofxGui_Object_Button;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-void ofxGuiButton::init(int id, string name, int x, int y, int width, int height, bool value, int mode, string image = "")
+//--------------------------------------------------------------
+void ofxGuiButton::init(string _name, int _x, int _y, int _width, int _height, int _value, int _mode, string _image = "")
 {
-	int	textWidth	= (name == "") ? 0 : mGlobals->mButtonXText + roundInt(mGlobals->mHeadFont.stringWidth(name));
+	int	textWidth	= (_name == "") ? 0 : mGlobals->mButtonXText + roundInt(mGlobals->mHeadFont.stringWidth(_name));
 
-	mParamId		= id;
-	mParamName		= name;
+	mParamName		= _name;
+	
+	x			= _x;
+	y			= _y;
 
-	mObjX			= x;
-	mObjY			= y;
+	width		= textWidth + _width;
+	height		= _height;
 
-	mObjWidth		= textWidth + width;
-	mObjHeight		= height;
+	mMode			= _mode;
+	
+	renderType		= kofxGui_Button_Render_Default;
 
-	mMode			= mode;
+	setValue(_value);
+	
+	// custom, just for the button itself
+	setHitRegion(0, 0, _width, _height);
 
-	setValue(value);
-	setControlRegion(0, 0, width, height);
-
-	if(image != "") logo.loadImage(image);
+	if(_image != "") logo.loadImage(_image);
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-void ofxGuiButton::setValue(bool value)
+//--------------------------------------------------------------
+void ofxGuiButton::setValue(int value)
 {
 	mValue = value;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-bool ofxGuiButton::update(int id, int task, void* data, int length)
-{
-	bool handled = false;
-
-	if(id == mParamId && length == sizeof(bool))
-	{
-		setValue(*(bool*)data);
-		handled = true;
-	}
-
-	return handled;
-}
-
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiButton::draw()
 {
 	glPushMatrix();
 
-		glTranslatef(mObjX, mObjY, 0.0f);
+	// go to this control box area
+	glTranslatef(x, y, 0.0f);
+	
+	if(mParamName != "")
+		drawParamString(cRect.width + mGlobals->mButtonXText, mGlobals->mButtonYText, mParamName, false);
 
-		if(mParamName != "")
-			drawParamString(mCtrWidth + mGlobals->mButtonXText, mGlobals->mButtonYText, mParamName, false);
+	if(renderType == kofxGui_Button_Render_X) {
+		
+		if(mValue == 1) {
+			ofLine(cRect.x+2, cRect.y+3, cRect.width-3, cRect.height-2);
+			ofLine(cRect.width-3, cRect.y+3, cRect.x+2, cRect.height-2);
+		} else {
+			
+		}
+		
+	} else if(renderType == kofxGui_Button_Render_PlusMinus) {
 
+		// horz
+		ofLine(cRect.x+2, floor(cRect.height / 2), cRect.width - 3, floor(cRect.height / 2));
+		
+		// vert 
+		if(mValue == 1) {
+			ofLine(floor(cRect.width / 2), 3, ceil(cRect.width / 2), cRect.height -2);
+		}
+		
+	} else {
+		// ddefault
 		ofFill();
-
 		//	background
 		glColor4f(mGlobals->mCoverColor.r, mGlobals->mCoverColor.g, mGlobals->mCoverColor.b, mGlobals->mCoverColor.a);
-		ofRect(mCtrX, mCtrY, mCtrWidth, mCtrHeight);
 
-		logo.draw(0,0, mCtrWidth, mCtrHeight);
-
+		// makes it NOT see through
+		ofRect(cRect.x, cRect.y, cRect.width, cRect.height);
+		
+		//logo.draw(cRect.x, cRect.y, cRect.width, cRect.height);
+		
 		if(mValue == 1)
 		{
 			//	handle
-			glColor4f(mGlobals->mButtonColor.r, mGlobals->mButtonColor.g, mGlobals->mButtonColor.b, mGlobals->mButtonColor.a);
-			ofRect(mCtrX , mCtrY, mCtrWidth, mCtrHeight);
+			if(isEnabled) {
+				glColor4f(mGlobals->mButtonColor.r, mGlobals->mButtonColor.g, mGlobals->mButtonColor.b, mGlobals->mButtonColor.a);
+			} else {
+				glColor4f(mGlobals->mDisabledColor.r, mGlobals->mDisabledColor.g, mGlobals->mDisabledColor.b, mGlobals->mDisabledColor.a);
+			}
+			
+			
+			ofRect(cRect.x, cRect.y, cRect.width, cRect.height);
 		}
-
+		
 		ofNoFill();
 
-		//	frame
-		glColor4f(mGlobals->mFrameColor.r, mGlobals->mFrameColor.g, mGlobals->mFrameColor.b, mGlobals->mFrameColor.a);
-		ofRect(mCtrX, mCtrY, mCtrWidth, mCtrHeight);
+	}
+		
+	//	frame
+	
+	if (isEnabled) {
+		if(mouseOver) {
+			glColor4f(1,1,0,1);
+		} else {
+			glColor4f(mGlobals->mFrameColor.r, mGlobals->mFrameColor.g, mGlobals->mFrameColor.b, mGlobals->mFrameColor.a);
+		}
+	} else {
+		glColor4f(mGlobals->mDisabledColor.r, mGlobals->mDisabledColor.g, mGlobals->mDisabledColor.b, mGlobals->mDisabledColor.a);
+	
+		//glColor4f(mGlobals->mFrameColor.r, mGlobals->mFrameColor.g, mGlobals->mFrameColor.b, mGlobals->mFrameColor.a);
 
+	}
+
+	// we have already translated to x/y
+	ofRect(cRect.x, cRect.y, cRect.width, cRect.height);
+	
 	glPopMatrix();
 }
 
-//	----------------------------------------------------------------------------------------------------
 
-bool ofxGuiButton::mouseDragged(int x, int y, int button)
+//--------------------------------------------------------------
+void ofxGuiButton::onRollOver(int x, int y)
 {
-	return mMouseIsDown;
+	//cout << "Button: " << mParamName << " roll on! " << x << "/" << y << endl;
+}
+//--------------------------------------------------------------
+void ofxGuiButton::onRollOut()
+{
+	//cout << "Button: " << mParamName << " roll out! " << endl;
+	
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-bool ofxGuiButton::mousePressed(int x, int y, int button)
-{
-	mMouseIsDown = isPointInsideMe(mouseToLocal(x, y));
-
-	if(mMouseIsDown)
-	{
-		if(mMode == kofxGui_Button_Trigger)
-			setValue(true);
-		else
-			setValue(!mValue);
-
-		mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Bool, &mValue, sizeof(bool));
-	}
-
-	return mMouseIsDown;
+//--------------------------------------------------------------
+void ofxGuiButton::onMouseMove(int x, int y)
+{	
+	//cout << "Button: " << mParamName << " mouse move on! " << x << "/" << y << endl;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
-bool ofxGuiButton::mouseReleased(int x, int y, int button)
+//--------------------------------------------------------------
+void ofxGuiButton::onDragOver(int x, int y, int button)
 {
-	bool handled = mMouseIsDown;
+	//cout << "Button: " << mParamName << " drag over! " << x << "/" << y << "/" << button << endl;
+}
 
-	if(mMouseIsDown)
-	{
-		if(mMode == kofxGui_Button_Trigger)
-		{
-			setValue(false);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Bool, &mValue, sizeof(bool));
+//--------------------------------------------------------------
+void ofxGuiButton::onDragOutside(int x, int y, int button)
+{
+	//cout << "Button: " << mParamName << " drag outside! " << x << "/" << y << "/" << button << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiButton::onPress(int x, int y, int button)
+{
+
+	
+	if(button == 0) {
+		// left click
+		
+		if (mMode == kofxGui_Button_Switch) {
+			mValue ^= 1; // toggle
+		} else if(mMode == kofxGui_Button_Trigger) {
+			mValue = 1; // turn on
 		}
-
-		mMouseIsDown = false;
+		
+		ofNotifyEvent(ofxGuiButtonEvent, mValue, this);
 	}
-
-	return handled;
+	
+	//cout << "Button: " << mParamName << " press! " << x << "/" << y << "/" << button << endl;
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
+void ofxGuiButton::onPressOutside(int x, int y, int button)
+{
+	//cout << "Button: " << mParamName << " press outside! " << x << "/" << y << "/" << button << endl;
+}
 
+//--------------------------------------------------------------
+void ofxGuiButton::onRelease(int x, int y, int button)
+{
+	
+	if(button == 0) {
+		// left click
+		if(mMode == kofxGui_Button_Trigger) {
+			mValue = 0; // turn on
+		}
+		
+		ofNotifyEvent(ofxGuiButtonEvent, mValue, this);
+	}
+	
+	
+	//cout << "Button: " << mParamName << " released! " << x << "/" << y << "/" << button << endl;
+}
+
+//--------------------------------------------------------------
+void ofxGuiButton::onReleaseOutside(int x, int y, int button)
+{
+	
+	if(mouseDown && button == 0) {
+		// left click
+		if(mMode == kofxGui_Button_Trigger) {
+			mValue = 0; // turn on
+		}
+		
+		ofNotifyEvent(ofxGuiButtonEvent, mValue, this);
+		
+	}
+	
+	//cout << "Button: " << mParamName << " released outside! " << x << "/" << y << "/" << button << endl;
+	
+}
+
+//--------------------------------------------------------------
+void ofxGuiButton::keyPressed( int key )
+{
+	//cout << "Button: " << mParamName << " key pressed! " << key << endl;
+	
+}
+
+//--------------------------------------------------------------
+void ofxGuiButton::keyReleased( int key )
+{
+	//cout << "Button: " << mParamName << " key released! " << key << endl;
+}
+
+
+
+
+
+//--------------------------------------------------------------
 void ofxGuiButton::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Bool, &mValue, sizeof(bool));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Bool, &mValue, sizeof(bool));
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiButton::saveToXml()
 {
 	int		id		= saveObjectData();
-	bool	value	= (mMode == kofxGui_Button_Trigger) ? false : mValue;
+	bool	value	= (mMode == kofxGui_Button_Trigger) ? false : (mValue == 1);
 
 	mGlobals->mXml.setValue("OBJECT:VALUE", value, id);
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
+

@@ -20,11 +20,11 @@ ofxGuiSwitch::ofxGuiSwitch()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiSwitch::init(int id, string name, int x, int y, int width, int height, int min, int max, int value, const string* paramStrings)
+void ofxGuiSwitch::init(/*int id,*/ string name, int x, int y, int width, int height, int min, int max, int value, const string* paramStrings)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -54,7 +54,7 @@ void ofxGuiSwitch::setValue(int value)
 		if (mDisplay == kofxGui_Display_String && value != mValue)
 		{
 			int id = (int)value;
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
 		}
 	mValue = value;	
 }
@@ -70,6 +70,7 @@ void ofxGuiSwitch::setRange(int min, int max)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiSwitch::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -85,6 +86,7 @@ bool ofxGuiSwitch::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -141,6 +143,12 @@ void ofxGuiSwitch::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -153,7 +161,7 @@ bool ofxGuiSwitch::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			setValue(value);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
 		}
 	}
 	
@@ -186,6 +194,14 @@ bool ofxGuiSwitch::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiSwitch::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiSwitch::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiSwitch::buildFromXml()
 {
 	int numberOfTags = mGlobals->mXml.getNumTags("STRING");
@@ -207,7 +223,7 @@ void ofxGuiSwitch::buildFromXml()
 		}
 	}
 	
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Int, &mValue, sizeof(int));
 }
 
 //	----------------------------------------------------------------------------------------------------

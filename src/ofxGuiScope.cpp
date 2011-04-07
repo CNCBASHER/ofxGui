@@ -42,11 +42,11 @@ ofxGuiScope::~ofxGuiScope()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiScope::init(int id, string name, int x, int y, int width, int height, int length, ofxPoint2f value, int mode)
+void ofxGuiScope::init(/*int id, */string name, int x, int y, int width, int height, int length, ofxPoint2f value, int mode)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -68,7 +68,7 @@ void ofxGuiScope::init(int id, string name, int x, int y, int width, int height,
 	
 	memset(mBuffer, 0, sizeof(float) * mBufferLength);
 
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_FloatArray, mBuffer, mBufferLength);
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_FloatArray, mBuffer, mBufferLength);
 }
 
 //	----------------------------------------------------------------------------------------------------
@@ -82,6 +82,7 @@ void ofxGuiScope::setValue(ofxPoint2f value)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiScope::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -103,6 +104,7 @@ bool ofxGuiScope::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -179,6 +181,12 @@ void ofxGuiScope::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -191,7 +199,7 @@ bool ofxGuiScope::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			setValue(value);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
 			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_PointArray, &mBuffer, sizeof(float*));
 		}
 	}
@@ -225,11 +233,19 @@ bool ofxGuiScope::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiScope::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiScope::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiScope::buildFromXml()
 {
 	//	load sampledata embeded within xml?
 
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Point, &mValue, sizeof(ofxPoint2f));
 }
 
 //	----------------------------------------------------------------------------------------------------

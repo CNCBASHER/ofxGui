@@ -19,35 +19,32 @@
  *
  */
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 #include "ofxGuiGlobals.h"
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 ofxGuiGlobals* ofxGuiGlobals::Instance()
 {
 	static ofxGuiGlobals globals;
 	return &globals;
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 ofxGuiGlobals::ofxGuiGlobals()
 {
 	mXmlfile			= "";
 
-	mHeadFontName		= "fonts/verdana.ttf";
+	mHeadFontName		= "resources/fonts/verdana.ttf";
 	mHeadFontSize		= 12;
 	mHeadFontXOffset	= -2;
 	mHeadFontYOffset	= 8;
 	mHeadFontHeight		= 12;
 
-	mParamFontName		= "fonts/automat.ttf";
-	mParamFontSize		= 8;
+	mParamFontName		= "resources/fonts/automat.ttf";
+	mParamFontSize		= 6;
 	mParamFontXOffset	= -2;
 	mParamFontYOffset	= 6;
-	mParamFontHeight		= 12;
+	mParamFontHeight	= 12;
 
 	mButtonXText		= 4;
 	mButtonYText		= 0;
@@ -70,12 +67,19 @@ ofxGuiGlobals::ofxGuiGlobals()
 	mCurveColor			= ofRGBA(0xFF9900FF);
 	mScopeColor			= ofRGBA(0xFF9900FF);
 	mMatrixColor		= ofRGBA(0xFF0000FF);
+	
+	mDisabledColor		= ofRGBA(0xFFFFFF66);
 
 	loadFonts();
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
+//ofxGuiGlobals::~ofxGuiGlobals()
+//{
+	// nothing to do ...
+	
+//}
+//--------------------------------------------------------------
 void ofxGuiGlobals::buildFromXml()
 {
 	int numberOfTags = mXml.getNumTags("STYLE");
@@ -119,13 +123,15 @@ void ofxGuiGlobals::buildFromXml()
 	mScopeColor			= ofRGBA(mXml.getValue("SCOPECOLOR",	"FF9900FF"));
 	mMatrixColor		= ofRGBA(mXml.getValue("ACTIVECOLOR",	"FF0000FF"));
 
+	mDisabledColor		= ofRGBA(mXml.getValue("DISABLEDCOLOR",	"C0C0C0FF"));
+
+	
 	mXml.popTag();
 
 	loadFonts();
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiGlobals::saveToXml()
 {
 	int id = mXml.addTag("STYLE");
@@ -163,14 +169,22 @@ void ofxGuiGlobals::saveToXml()
 	mXml.setValue("STYLE:CURVECOLOR",	mCurveColor.toString(kofxGui_Color_RGBA), id);
 	mXml.setValue("STYLE:SCOPECOLOR",	mScopeColor.toString(kofxGui_Color_RGBA), id);
 	mXml.setValue("STYLE:ACTIVECOLOR",	mMatrixColor.toString(kofxGui_Color_RGBA), id);
+	
+	mXml.setValue("STYLE:DISABLEDCOLOR",	mDisabledColor.toString(kofxGui_Color_RGBA), id);
+
 }
 
-//	----------------------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------
 void ofxGuiGlobals::loadFonts()
 {
 	mHeadFont.loadFont(mHeadFontName, mHeadFontSize, true, true);
+	
+	//cout << mParamFontSize << endl;
+	//cout << mParamFontName << endl;
+
+	
 	mParamFont.loadFont(mParamFontName, mParamFontSize, true, true);
 }
 
-//	----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------
+

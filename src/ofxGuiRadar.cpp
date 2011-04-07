@@ -32,11 +32,11 @@ ofxGuiRadar::ofxGuiRadar()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiRadar::init(int id, string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps)
+void ofxGuiRadar::init(/*int id,*/ string name, int x, int y, int width, int height, float min, float max, float value, int display, int steps)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -68,7 +68,7 @@ void ofxGuiRadar::setValue(float value)
 		if (mDisplay == kofxGui_Display_String && value != mValue)
 		{
 			int id = (int)value;
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Get_String, &id, sizeof(int));
 		}
 	}
 	
@@ -86,6 +86,7 @@ void ofxGuiRadar::setRange(float min, float max)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiRadar::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -102,6 +103,7 @@ bool ofxGuiRadar::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -143,6 +145,12 @@ void ofxGuiRadar::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -155,7 +163,7 @@ bool ofxGuiRadar::mouseDragged(int x, int y, int button)
 		if(value != mValue)
 		{
 			setValue(value);
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
+			//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
 		}
 	}
 	
@@ -188,9 +196,17 @@ bool ofxGuiRadar::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiRadar::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiRadar::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiRadar::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Float, &mValue, sizeof(float));
 }
 
 //	----------------------------------------------------------------------------------------------------

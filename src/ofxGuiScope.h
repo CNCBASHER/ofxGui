@@ -34,33 +34,35 @@
 class ofxGuiScope : public ofxGuiObject
 {
 	
-public:
-	
-	 ofxGuiScope();
-	~ofxGuiScope();
-	
-	void		init(int id, string name, int x, int y, int width, int height, int length, ofxPoint2f value, int mode);
-	
-	void		setValue(ofxPoint2f value);
-	
-	bool		update(int id, int task, void* data, int length);
-	void		draw();
-	
-	bool		mouseDragged(int x, int y, int button);
-	bool		mousePressed(int x, int y, int button);
-	bool		mouseReleased(int x, int y, int button);
-	
-	void		buildFromXml();
-	void		saveToXml();
+	public:
 		
-	ofxPoint2f	valueToFraction(ofxPoint2f value);
-	ofxPoint2f	fractionToValue(ofxPoint2f fraction);
+		 ofxGuiScope();
+		~ofxGuiScope();
+		
+		void		init(/*int id,*/ string name, int x, int y, int width, int height, int length, ofxPoint2f value, int mode);
+		
+		void		setValue(ofxPoint2f value);
+		
+		void		draw();
+			
+		ofxGuiObject*	mouseMoved(int x, int y);
+		ofxGuiObject*	mouseDragged(int x, int y, int button);
+		ofxGuiObject*	mousePressed(int x, int y, int button);
+		ofxGuiObject*	mouseReleased(int x, int y, int button);
+		ofxGuiObject*	keyPressed(int key);
+		ofxGuiObject*	keyReleased(int key);
+		
+		void		buildFromXml();
+		void		saveToXml();
+			
+		ofxPoint2f	valueToFraction(ofxPoint2f value);
+		ofxPoint2f	fractionToValue(ofxPoint2f fraction);
 
-	ofxPoint2f	mValue;
-	
-	float*		mBuffer;
-	int			mBufferLength;
-};
+		ofxPoint2f	mValue;
+		
+		float*		mBuffer;
+		int			mBufferLength;
+	};
 
 //	----------------------------------------------------------------------------------------------------
 

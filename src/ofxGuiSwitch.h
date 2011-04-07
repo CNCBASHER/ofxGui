@@ -26,25 +26,28 @@ class ofxGuiSwitch : public ofxGuiObject
 		
 		ofxGuiSwitch();
 		
-		void			init(int id, string name, int x, int y, int width, int height, int min, int max, int value, const string* paramStrings);
+		void		init(/*int id,*/ string name, int x, int y, int width, int height, int min, int max, int value, const string* paramStrings);
 		
-		void			setValue(int value);
-		void			setRange(int min, int max);
+		void		setValue(int value);
+		void		setRange(int min, int max);
 		
-		bool			update(int id, int task, void* data, int length);
-		void			draw();
+		bool		update(int id, int task, void* data, int length);
+		void		draw();
 		
-		bool			mouseDragged(int x, int y, int button);
-		bool			mousePressed(int x, int y, int button);
-		bool			mouseReleased(int x, int y, int button);
+		ofxGuiObject*	mouseMoved(int x, int y);
+		ofxGuiObject*	mouseDragged(int x, int y, int button);
+		ofxGuiObject*	mousePressed(int x, int y, int button);
+		ofxGuiObject*	mouseReleased(int x, int y, int button);
+		ofxGuiObject*	keyPressed(int key);
+		ofxGuiObject*	keyReleased(int key);
+
+		void		buildFromXml();
+		void		saveToXml();
 		
-		void			buildFromXml();
-		void			saveToXml();
+		int			fractionToValue(float fraction);
 		
-		int				fractionToValue(float fraction);
-		
-		int				mValue, mMinVal, mMaxVal, mValDlt;
-		vector			<string>mParamStrings;
+		int			mValue, mMinVal, mMaxVal, mValDlt;
+		vector		<string>mParamStrings;
 	};
 
 //	----------------------------------------------------------------------------------------------------

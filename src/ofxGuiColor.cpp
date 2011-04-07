@@ -33,11 +33,11 @@ ofxGuiColor::ofxGuiColor()
 
 //	----------------------------------------------------------------------------------------------------
 
-void ofxGuiColor::init(int id, string name, int x, int y, int width, int height, ofRGBA value, int mode)
+void ofxGuiColor::init(/*int id,*/ string name, int x, int y, int width, int height, ofRGBA value, int mode)
 {
 	int	textHeight	= (name == "") ? 0 : mGlobals->mParamFontHeight;
 	
-	mParamId		= id;
+	//mParamId		= id;
 	mParamName		= name;
 	
 	mObjX			= x; 
@@ -63,6 +63,7 @@ void ofxGuiColor::setValue(ofRGBA value)
 
 //	----------------------------------------------------------------------------------------------------
 
+/*
 bool ofxGuiColor::update(int id, int task, void* data, int length)
 {
 	bool handled = false;
@@ -75,6 +76,7 @@ bool ofxGuiColor::update(int id, int task, void* data, int length)
 	
 	return handled;
 }
+ */
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -86,6 +88,7 @@ void ofxGuiColor::draw()
 
 	//	color
 	glColor4f(1, 1, 1, 1);
+		
 	ofRect(mCtrX, mCtrY-17, mCtrWidth, 17);
 
 	ofFill();
@@ -165,6 +168,12 @@ void ofxGuiColor::draw()
 	
 	glPopMatrix();
 }
+//	----------------------------------------------------------------------------------------------------
+
+ofxGuiObject* ofxGuiFiles::mouseMoved(int x, int y)
+{
+	return NULL;
+}
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -176,7 +185,7 @@ bool ofxGuiColor::mouseDragged(int x, int y, int button)
 		mValue.setChanel(mSlider, mouseToFraction(mouseToLocal(x, y)).x);
 		
 		//	if(mValue.toInt(mDisplay) != value)
-			mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Color, &mValue, sizeof(ofRGBA));
+		//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Color, &mValue, sizeof(ofRGBA));
 	}
 	
 	return mMouseIsDown;
@@ -212,9 +221,17 @@ bool ofxGuiColor::mouseReleased(int x, int y, int button)
 
 //	----------------------------------------------------------------------------------------------------
 
+bool ofxGuiColor::keyPressed(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
+bool ofxGuiColor::keyReleased(int key){ cout << "Keypress unimplemented." << endl; }
+
+//	----------------------------------------------------------------------------------------------------
+
 void ofxGuiColor::buildFromXml()
 {
-	mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Color, &mValue, sizeof(ofRGBA));
+	//mGlobals->mListener->handleGui(mParamId, kofxGui_Set_Color, &mValue, sizeof(ofRGBA));
 }
 
 //	----------------------------------------------------------------------------------------------------
